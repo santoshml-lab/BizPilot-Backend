@@ -34,4 +34,75 @@ def home():
         "app": "BizPilot AI Backend"
     }
 
+# ===========================
+# CHAT ENDPOINT
+# ===========================
+
+@app.post("/chat")
+async def chat(request: ChatRequest):
+
+    try:
+
+        response = client.chat.completions.create(
+
+            model="openai/gpt-oss-20b",
+
+            messages=[
+
+                {
+                    "role": "system",
+                    "content": """
+You are BizPilot AI.
+
+You are a professional AI Business Assistant.
+
+Help users with:
+- Business Ideas
+- Startups
+- Marketing
+- Sales
+- Emails
+- Business Plans
+- Finance
+- Productivity
+- Customer Support
+- HR
+- Content Writing
+
+Always answer professionally.
+
+"""
+                },
+
+                {
+                    "role": "user",
+                    "content": request.message
+                }
+
+            ],
+
+            temperature=0.7,
+
+            max_tokens=1500
+
+        )
+
+        return {
+
+            "success": True,
+
+            "reply": response.choices[0].message.content
+
+        }
+
+    except Exception as e:
+
+        return {
+
+            "success": False,
+
+            "error": str(e)
+
+        }
+
 
