@@ -361,6 +361,59 @@ Return:
             "error": str(e)
         }
 
+from pydantic import BaseModel
+
+# ===========================
+# Analytics Request
+# ===========================
+
+class AnalyticsRequest(BaseModel):
+    pass
+
+
+# ===========================
+# Analytics Endpoint
+# ===========================
+
+@app.post("/analytics")
+async def analytics(req: AnalyticsRequest):
+
+    return {
+
+        "success": True,
+
+        "requests": 245,
+
+        "emails": 61,
+
+        "documents": 18,
+
+        "invoices": 29,
+
+        "plans": 41,
+
+        "productivity": 96,
+
+        "tool": "🤖 AI Chat",
+
+        "activity": [
+
+            "AI Chat completed successfully",
+
+            "Professional Email Generated",
+
+            "Document Analyzed",
+
+            "Invoice Created",
+
+            "Smart Planner Generated",
+
+            "Dashboard Accessed"
+
+        ]
+
+    }
+
 
 
 
