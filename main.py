@@ -105,4 +105,30 @@ Always answer professionally.
 
         }
 
+@app.post("/email")
+async def generate_email(data: dict):
+
+    prompt = f"""
+Write a professional email.
+
+Subject: {data['subject']}
+Type: {data['type']}
+Tone: {data['tone']}
+
+Details:
+{data['details']}
+"""
+
+    response = client.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        messages=[
+            {"role":"user","content":prompt}
+        ]
+    )
+
+    return {
+        "success": True,
+        "email": response.choices[0].message.content
+    }
+
 
