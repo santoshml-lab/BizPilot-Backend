@@ -231,35 +231,75 @@ from pydantic import BaseModel
 class InvoiceRequest(BaseModel):
     prompt: str
 
+
 @app.post("/invoice-ai")
 async def invoice_ai(req: InvoiceRequest):
 
     try:
 
         prompt = f"""
-Generate a professional business invoice.
+You are BizPilot AI.
+
+Create a PREMIUM professional business invoice.
 
 User Request:
 {req.prompt}
 
-Return:
+IMPORTANT RULES:
 
-Company Name:
-Client Name:
-Service:
-Description:
-Payment Terms:
-Notes:
+- Return ONLY HTML.
+- Do NOT use Markdown.
+- Do NOT use ```html.
+- Use inline CSS only.
+- Background should be white.
+- Text color should be dark.
+- Blue header (#2563EB).
+- Rounded corners.
+- Nice shadows.
+- Professional spacing.
+
+Invoice must contain:
+
+• Company Name
+• INVOICE title
+• Invoice Number
+• Date
+• Bill To
+• Service
+• Description
+• Quantity
+• Price
+• GST
+• Grand Total
+• Payment Terms
+• Notes
+• Thank You Message
+
+Create a beautiful table.
+
+Grand Total should be highlighted.
+
+Finish with:
+
+"Thank you for choosing our services ❤️"
+
+Return ONLY HTML.
 """
 
         response = client.chat.completions.create(
             model="openai/gpt-oss-20b",
             messages=[
                 {
+                    "role": "system",
+                    "content": "You are a professional invoice designer."
+                },
+                {
                     "role": "user",
                     "content": prompt
                 }
-            ]
+            ],
+            temperature=0.4,
+            max_tokens=2000
         )
 
         return {
@@ -273,5 +313,9 @@ Notes:
             "success": False,
             "error": str(e)
         }
+
+
+
+
 
 
