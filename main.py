@@ -226,4 +226,52 @@ Document:
             "error": str(e)
         }
 
+from pydantic import BaseModel
+
+class InvoiceRequest(BaseModel):
+    prompt: str
+
+@app.post("/invoice-ai")
+async def invoice_ai(req: InvoiceRequest):
+
+    try:
+
+        prompt = f"""
+Generate a professional business invoice.
+
+User Request:
+{req.prompt}
+
+Return:
+
+Company Name:
+Client Name:
+Service:
+Description:
+Payment Terms:
+Notes:
+"""
+
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-20b",
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        return {
+            "success": True,
+            "reply": response.choices[0].message.content
+        }
+
+    except Exception as e:
+
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
 
