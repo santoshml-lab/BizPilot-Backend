@@ -314,6 +314,53 @@ Return ONLY HTML.
             "error": str(e)
         }
 
+class PlannerRequest(BaseModel):
+    prompt: str
+
+@app.post("/planner")
+async def planner(req: PlannerRequest):
+
+    try:
+
+        prompt = f"""
+You are BizPilot AI.
+
+Create a professional action plan.
+
+Goal:
+{req.prompt}
+
+Return:
+
+- Daily Tasks
+- Weekly Goals
+- Timeline
+- Priority
+- Tips
+"""
+
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-20b",
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        return {
+            "success": True,
+            "reply": response.choices[0].message.content
+        }
+
+    except Exception as e:
+
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
 
 
 
