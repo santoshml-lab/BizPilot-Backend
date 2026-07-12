@@ -136,8 +136,16 @@ Details:
         "email": response.choices[0].message.content
     }
 
+from fastapi import Form
+
 @app.post("/document")
-async def analyze_document(file: UploadFile = File(...)):
+async def analyze_document(
+
+    file: UploadFile = File(...),
+
+    task: str = Form(...)
+
+):
 
     try:
 
@@ -183,7 +191,15 @@ async def analyze_document(file: UploadFile = File(...)):
         os.remove(temp_path)
 
         prompt = f"""
-Analyze the following document.
+Perform this task:
+
+{task}
+
+Document:
+
+{text}
+"""
+
 
 Generate:
 
