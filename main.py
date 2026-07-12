@@ -136,7 +136,11 @@ Details:
         "email": response.choices[0].message.content
     }
 
-from fastapi import Form
+from fastapi import UploadFile, File, Form
+from docx import Document
+import pdfplumber
+import tempfile
+import os
 
 @app.post("/document")
 async def analyze_document(
@@ -151,15 +155,19 @@ async def analyze_document(
 
         text = ""
 
-        # Save uploaded file temporarily
-        suffix = os.path.splitext(file.filename)[1]
+        suffix = os.path.splitext(file.filename)[1].lower()
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp:
+
             temp.write(await file.read())
+
             temp_path = temp.name
 
-        # Read PDF
-        if suffix.lower() == ".pdf":
+        # ==========================
+        # READ PDF
+        # ==========================
+
+        if suffix == ".pdf":
 
             with pdfplumber.open(temp_path) as pdf:
 
@@ -168,10 +176,14 @@ async def analyze_document(
                     page_text = page.extract_text()
 
                     if page_text:
+
                         text += page_text + "\n"
 
-        # Read DOCX
-        elif suffix.lower() == ".docx":
+        # ==========================
+        # READ DOCX
+        # ==========================
+
+        elif suffix == ".docx":
 
             doc = Document(temp_path)
 
@@ -190,57 +202,74 @@ async def analyze_document(
 
         os.remove(temp_path)
 
-        prompt = f"""
-Perform this task:
+        # ==========================
+        # PROMPT
+        # ==========================
 
+        prompt = f"""
+You are BizPilot AI.
+
+Perform ONLY the following task:
+
+Task:
 {task}
 
 Document:
 
 {text}
+
+Instructions:
+
+- If task is Summarize Document → Create a professional summary.
+- If task is Explain Document → Explain in simple language.
+- If task is Extract Key Points → Give bullet points.
+- If task is Translate Document → Translate professionally.
+- If task is Create Notes → Create revision notes.
+- If task is Generate Questions → Create important interview/exam questions.
+
+Use proper headings and formatting.
 """
 
-
-Generate:
-
-1. Executive Summary
-
-2. Key Points
-
-3. Important Dates
-
-4. Important Numbers
-
-5. Action Items
-
-6. Final Conclusion
-
-Document:
-
-{text}
-"""
+        # ==========================
+        # AI
+        # ==========================
 
         response = client.chat.completions.create(
+
             model="openai/gpt-oss-20b",
+
             messages=[
                 {
                     "role": "user",
                     "content": prompt
                 }
-            ]
+            ],
+
+            temperature=0.5,
+
+            max_tokens=2000
+
         )
 
         return {
+
             "success": True,
+
             "analysis": response.choices[0].message.content
+
         }
 
     except Exception as e:
 
         return {
+
             "success": False,
+
             "error": str(e)
+
         }
+                                      
+    
 
 from pydantic import BaseModel
 
